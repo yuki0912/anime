@@ -1,0 +1,495 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Gallery</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0f0f;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      background: #1a1a2e;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 2px solid #e94560;
+    }
+    header h1 { font-size: 1.6rem; color: #e94560; }
+    nav {
+      display: flex;
+      gap: 8px;
+      padding: 16px 32px;
+      background: #16213e;
+      flex-wrap: wrap;
+    }
+    nav button {
+      background: #0f3460;
+      color: #eee;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    nav button:hover, nav button.active {
+      background: #e94560;
+      color: #fff;
+    }
+    .count {
+      margin: 12px 32px;
+      font-size: 0.85rem;
+      color: #888;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      padding: 12px 32px 32px;
+    }
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #1a1a2e;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      aspect-ratio: 1;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-item .label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      padding: 24px 8px 8px;
+      font-size: 0.72rem;
+      color: #ccc;
+      opacity: 0;
+      transition: opacity 0.2s;
+      word-break: break-all;
+    }
+    
+    /* 優化：僅在支援滑鼠懸停的裝置上觸活動態特效，防止手機版點擊後特效卡死 */
+    @media (hover: hover) {
+      .gallery-item:hover {
+        transform: scale(1.03);
+        box-shadow: 0 0 16px #e9456066;
+      }
+      .gallery-item:hover .label { 
+        opacity: 1; 
+      }
+    }
+    
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(233,69,96,0.4);
+    }
+    .lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      font-size: 2rem;
+      cursor: pointer;
+      color: #eee;
+      background: none;
+      border: none;
+      line-height: 1;
+    }
+    .lightbox-nav {
+      display: flex;
+      gap: 16px;
+    }
+    .lightbox-nav button {
+      background: #e94560;
+      color: #fff;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .lightbox-nav button:hover { background: #c73350; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Image Gallery</h1>
+  </header>
+  <nav id="tabs"></nav>
+  <div class="count" id="count"></div>
+  <div class="gallery" id="gallery"></div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
+    <img id="lightbox-img" src="" alt="" />
+    <div class="lightbox-nav">
+      <button onclick="navigate(-1)">&#8592; Prev</button>
+      <button onclick="navigate(+2)">up &#8594;</button>
+      <button onclick="navigate(1)">Next &#8594;</button>
+    </div>
+  </div>
+
+  <script>
+    const categories = {
+      "Arknights": [],
+      "Project Sekai": [],
+      "照片": [],
+      "圖片": [],
+    };
+
+   fetch('images.json')
+      .then(r => r.json())
+      .then(data => {
+        Object.keys(categories).forEach(k => categories[k] = []);
+        Object.assign(categories, data);
+        buildTabs();
+        
+        const firstPopulated = Object.keys(categories).find(cat => categories[cat].length > 0);
+        showCategory(firstPopulated || Object.keys(categories)[0]);
+      })
+      .catch(err => console.error("載入 images.json 失敗:", err));
+
+    let currentCategory = '';
+    let currentIndex = 0;
+
+    function buildTabs() {
+      const nav = document.getElementById('tabs');
+      nav.innerHTML = ''; // 確保重複呼叫時不會疊加
+      Object.keys(categories).forEach((cat) => {
+        const btn = document.createElement('button');
+        btn.textContent = `${cat} (${categories[cat].length})`;
+        btn.onclick = () => showCategory(cat);
+        btn.id = `tab-${cat}`;
+        nav.appendChild(btn);
+      });
+    }
+
+    function showCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      const tab = document.getElementById(`tab-${cat}`);
+      if (tab) tab.classList.add('active');
+
+      const imgs = categories[cat] || [];
+      document.getElementById('count').textContent = `${imgs.length} image${imgs.length !== 1 ? 's' : ''}`;
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+      imgs.forEach((src, idx) => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = `<img src="${src}" loading="lazy" alt="" /><div class="label">${src.split('/').pop()}</div>`;
+        item.onclick = () => openLightbox(idx);
+        gallery.appendChild(item);
+      });
+    }
+
+    function openLightbox(idx) {
+      const imgs = categories[currentCategory];
+      if (!imgs || imgs.length === 0) return; // 防呆：無圖片時不執行
+
+      currentIndex = idx;
+      document.getElementById('lightbox-img').src = imgs[idx];
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    function navigate(dir) {
+      const imgs = categories[currentCategory];
+      if (!imgs || imgs.length === 0) return; // 防呆：無圖片時不執行
+
+      currentIndex = (currentIndex + dir + imgs.length) % imgs.length;
+      document.getElementById('lightbox-img').src = imgs[currentIndex];
+    }
+
+    document.getElementById('lightbox').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeLightbox();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') navigate(1);
+      if (e.key === 'ArrowLeft') navigate(-1);
+    });
+  </script>
+</body>
+</html>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PIC DATA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0f0f;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      background: #1a1a2e;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 2px solid #e94560;
+    }
+    header h1 { font-size: 1.6rem; color: #e94560; }
+    nav {
+      display: flex;
+      gap: 8px;
+      padding: 16px 32px;
+      background: #16213e;
+      flex-wrap: wrap;
+    }
+    nav button {
+      background: #0f3460;
+      color: #eee;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    nav button:hover, nav button.active {
+      background: #e94560;
+      color: #fff;
+    }
+    .count {
+      margin: 12px 32px;
+      font-size: 0.85rem;
+      color: #888;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      padding: 12px 32px 32px;
+    }
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #1a1a2e;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      aspect-ratio: 1;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-item .label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      padding: 24px 8px 8px;
+      font-size: 0.72rem;
+      color: #ccc;
+      opacity: 0;
+      transition: opacity 0.2s;
+      word-break: break-all;
+    }
+    
+    /* 優化：僅在支援滑鼠懸停的裝置上觸活動態特效，防止手機版點擊後特效卡死 */
+    @media (hover: hover) {
+      .gallery-item:hover {
+        transform: scale(1.03);
+        box-shadow: 0 0 16px #e9456066;
+      }
+      .gallery-item:hover .label { 
+        opacity: 1; 
+      }
+    }
+    
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(233,69,96,0.4);
+    }
+    .lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      font-size: 2rem;
+      cursor: pointer;
+      color: #eee;
+      background: none;
+      border: none;
+      line-height: 1;
+    }
+    .lightbox-nav {
+      display: flex;
+      gap: 16px;
+    }
+    .lightbox-nav button {
+      background: #e94560;
+      color: #fff;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .lightbox-nav button:hover { background: #c73350; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PIC DATA</h1>
+  </header>
+  <nav id="tabs"></nav>
+  <div class="count" id="count"></div>
+  <div class="gallery" id="gallery"></div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
+    <img id="lightbox-img" src="" alt="" />
+    <div class="lightbox-nav">
+      <button onclick="navigate(-1)">&#8592; Prev</button>
+      <button onclick="navigate(1)">Next &#8594;</button>
+    </div>
+  </div>
+
+  <script>
+    const categories = {
+      "Arknights": [],
+      "Project Sekai": [],
+    };
+
+    fetch('/api/images')
+      .then(r => r.json())
+      .then(data => {
+        // 清空預設占位符並寫入後端實際資料
+        Object.keys(categories).forEach(k => categories[k] = []);
+        Object.assign(categories, data);
+        buildTabs();
+        
+        // 自動載入第一個有圖片的分類，若皆無圖片則載入第一個分類
+        const firstPopulated = Object.keys(categories).find(cat => categories[cat].length > 0);
+        showCategory(firstPopulated || Object.keys(categories)[0]);
+      });
+
+    let currentCategory = '';
+    let currentIndex = 0;
+
+    function buildTabs() {
+      const nav = document.getElementById('tabs');
+      nav.innerHTML = ''; // 確保重複呼叫時不會疊加
+      Object.keys(categories).forEach((cat) => {
+        const btn = document.createElement('button');
+        btn.textContent = `${cat} (${categories[cat].length})`;
+        btn.onclick = () => showCategory(cat);
+        btn.id = `tab-${cat}`;
+        nav.appendChild(btn);
+      });
+    }
+
+    function showCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      const tab = document.getElementById(`tab-${cat}`);
+      if (tab) tab.classList.add('active');
+
+      const imgs = categories[cat] || [];
+      document.getElementById('count').textContent = `${imgs.length} image${imgs.length !== 1 ? 's' : ''}`;
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+      imgs.forEach((src, idx) => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = `<img src="${src}" loading="lazy" alt="" /><div class="label">${src.split('/').pop()}</div>`;
+        item.onclick = () => openLightbox(idx);
+        gallery.appendChild(item);
+      });
+    }
+
+    function openLightbox(idx) {
+      const imgs = categories[currentCategory];
+      if (!imgs || imgs.length === 0) return; // 防呆：無圖片時不執行
+
+      currentIndex = idx;
+      document.getElementById('lightbox-img').src = imgs[idx];
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    function navigate(dir) {
+      const imgs = categories[currentCategory];
+      if (!imgs || imgs.length === 0) return; // 防呆：無圖片時不執行
+
+      currentIndex = (currentIndex + dir + imgs.length) % imgs.length;
+      document.getElementById('lightbox-img').src = imgs[currentIndex];
+    }
+
+    document.getElementById('lightbox').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeLightbox();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') navigate(1);
+      if (e.key === 'ArrowLeft') navigate(-1);
+    });
+  </script>
+</body>
+</html>
+>>>>>>> 9cc44aacd7793d9e6a068d696b59ef94f76213db

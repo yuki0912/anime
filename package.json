@@ -1,0 +1,26 @@
+{
+  "name": "image-gallery",
+  "version": "1.0.0",
+  "description": "Arknights & Project Sekai image gallery",
+  "keywords": [
+    "gallery",
+    "arknights",
+    "pjsk"
+  ],
+  "homepage": "https://github.com/yuki0912/anime#readme",
+  "bugs": {
+    "url": "https://github.com/yuki0912/anime/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuki0912/anime.git"
+  },
+  "license": "MIT",
+  "author": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}
