@@ -1,14 +1,33 @@
-Anime — 自訂網站樣板
+# custom-website — Image upload + gallery
 
-這個分支 custom-website 包含一個簡單的靜態網站範本：
+我已為你在 `custom-website` 分支新增上傳與檢視照片的功能。變更檔案：
 
-檔案：
-- index.html — 首頁範本
-- styles.css — 基本樣式（可在 :root 修改主色）
-- script.js — 範例畫廊資料與小互動
+- server.js — Node/Express + Multer 的簡單上傳伺服器，會把檔案放在 `uploads/`，並提供 `/api/photos` 與 `/api/upload`。
+- package.json — 服務所需的套件（express, multer, cors）。
+- .gitignore — 排除 node_modules 與 uploads。
+- styles.css、script.js、index.html（已更新） — 加入上傳介面、動態載入相片與 lightbox。
 
-接下來可以：
-- 我可以幫你自訂配色、字體或新增頁面（如 Blog / Contact / Releases）。
-- 若要部署到 GitHub Pages，請告訴我要將哪個分支與路徑用於發布（預設我可以幫你設定 gh-pages 或使用 main）。
+如何在本機啟動（快速）：
 
-請告訴我你想要的風格（深色/淡色）、主色、以及需要的頁面或功能，我會接著把它加上。
+1. 確認已安裝 Node.js (推薦 v18+)
+2. Clone 並切換分支：
+   - git clone git@github.com:yuki0912/anime.git
+   - cd anime
+   - git checkout custom-website
+3. 安裝套件並啟動：
+   - npm install
+   - npm start
+4. 開啟瀏覽器： http://localhost:3000
+
+說明與限制：
+- 最大單檔 5MB；只接受 jpg/png/gif/webp。
+- 上傳檔案會儲存在專案的 uploads 資料夾（請注意備份與存取權限）。
+- GitHub Pages 無法直接做上傳（需要伺服器）。若要部署，我可以幫你把此專案部署到像 Render、Railway、Fly 或 Heroku 的平台。
+
+下一步我可以：
+- 加入使用者驗證與管理介面（限制誰可上傳/刪除）
+- 加入圖片縮圖、壓縮或自動調整尺寸
+- 加入刪除功能或標題/描述編輯
+- 幫你部署到雲端並設定自訂網域
+
+要我先做哪一項？
