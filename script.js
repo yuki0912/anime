@@ -1,8 +1,17 @@
 (() => {
   "use strict";
   const items = Array.isArray(window.GALLERY_ITEMS) ? window.GALLERY_ITEMS : [];
-  const categoryNames = { arknight: "Arknights", pjsk: "Project SEKAI", "圖片": "插畫收藏", "照片": "照片 / 其他" };
-  const categoryOrder = ["arknight", "pjsk", "圖片", "照片"];
+  const fallbackCategories = [
+    { key: "arknight", label: "Arknights" },
+    { key: "pjsk", label: "Project SEKAI" },
+    { key: "圖片", label: "插畫收藏" },
+    { key: "照片", label: "照片 / 其他" }
+  ];
+  const categoryDefinitions = Array.isArray(window.GALLERY_CATEGORIES) && window.GALLERY_CATEGORIES.length
+    ? window.GALLERY_CATEGORIES
+    : fallbackCategories;
+  const categoryNames = Object.fromEntries(categoryDefinitions.map((item) => [item.key, item.label]));
+  const categoryOrder = categoryDefinitions.map((item) => item.key);
   const FAVORITES_KEY = "yuki-archive-favorites-v1";
   const THEME_KEY = "yuki-archive-theme-v1";
   const PAGE_SIZE = 48;
@@ -21,7 +30,7 @@
   function saveFavorites() { try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favorites))); } catch (error) { console.warn("無法儲存收藏清單：", error); } }
   function updateCounters() {
     $("#total-count").textContent = String(items.length);
-    $("#category-count").textContent = String(new Set(items.map((item) => item.category)).size);
+    $("#category-count").textContent = String(categoryOrder.length);
     $("#hero-favorites-count").textContent = String(favorites.size);
     $("#header-favorites-count").textContent = String(favorites.size);
     $("#current-year").textContent = String(new Date().getFullYear());
@@ -30,7 +39,7 @@
     categoryFilters.replaceChildren();
     const counts = {};
     items.forEach((item) => { counts[item.category] = (counts[item.category] || 0) + 1; });
-    const options = [{ key: "all", label: "全部圖片", count: items.length }].concat(categoryOrder.filter((key) => counts[key]).map((key) => ({ key, label: categoryName(key), count: counts[key] })));
+    const options = [{ key: "all", label: "全部圖片", count: items.length }].concat(categoryOrder.map((key) => ({ key, label: categoryName(key), count: counts[key] || 0 })));
     options.forEach((option) => {
       const button = document.createElement("button");
       button.type = "button"; button.className = "category-button" + (state.category === option.key ? " active" : "");
@@ -60,7 +69,7 @@
     saveFavorites(); updateCounters(); render(); if (lightbox.open) updateLightbox();
   }
   function createCard(item, index) {
-    const card = document.createElement("article"); card.className = "gallery-card";
+    const card = document.createElement("article"); card.className = "gallery-card"; card.dataset.category = item.category;
     const preview = document.createElement("button"); preview.type = "button"; preview.className = "card-image-button"; preview.setAttribute("aria-label", "放大檢視：" + displayName(item));
     const image = document.createElement("img"); image.src = imageUrl(item.path); image.alt = displayName(item); image.loading = "lazy"; image.decoding = "async"; preview.append(image);
     preview.addEventListener("click", () => openLightbox(index));
@@ -76,8 +85,15 @@
     state.filtered = getFilteredItems(); const visible = state.filtered.slice(0, state.limit); grid.replaceChildren();
     if (!state.filtered.length) {
       const empty = document.createElement("div"); empty.className = "empty-state";
-      const title = document.createElement("strong"); title.textContent = state.favoritesOnly ? "還沒有收藏圖片" : "找不到符合條件的圖片";
-      const message = document.createElement("span"); message.textContent = state.favoritesOnly ? "按圖片右下角的愛心，就能加入你的收藏清單。" : "試試其他關鍵字，或切換不同分類。";
+      const categoryIsEmpty = categoryOrder.includes(state.category) && !items.some((item) => item.category === state.category);
+      const title = document.createElement("strong");
+      title.textContent = state.favoritesOnly ? "還沒有收藏圖片" : categoryIsEmpty ? categoryName(state.category) + "目前還沒有圖片" : "找不到符合條件的圖片";
+      const message = document.createElement("span");
+      message.textContent = state.favoritesOnly
+        ? "按圖片右下角的愛心，就能加入你的收藏清單。"
+        : categoryIsEmpty
+          ? "把圖片放進 GitHub 的「" + state.category + "/」資料夾，再推送到 main，就會自動加入收藏庫。"
+          : "試試其他關鍵字，或切換不同分類。";
       empty.append(title, message); grid.append(empty);
     } else { const fragment = document.createDocumentFragment(); visible.forEach((item, index) => fragment.append(createCard(item, index))); grid.append(fragment); }
     $("#result-count").textContent = state.filtered.length + " 張圖片";
