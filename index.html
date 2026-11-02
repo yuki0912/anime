@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#100d1b">
+  <meta name="description" content="Yuki 的動漫圖片收藏庫，整理 Arknights、Project SEKAI、插畫與照片。">
+  <title>Yuki Archive — Anime Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./gallery-data.js"></script>
+  <script src="./script.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Yuki Archive 首頁">
+      <span class="brand-mark">Y</span>
+      <span class="brand-copy"><strong>YUKI ARCHIVE</strong><small>ANIME IMAGE COLLECTION</small></span>
+    </a>
+    <nav class="top-nav" aria-label="主選單">
+      <a class="nav-link active" href="#gallery">收藏庫</a>
+      <a class="nav-link" href="#about">關於</a>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-button" id="theme-toggle" type="button" aria-label="切換配色" title="切換配色">☼</button>
+      <button class="favorites-shortcut" id="favorites-shortcut" type="button"><span aria-hidden="true">♡</span><span>收藏</span><b id="header-favorites-count">0</b></button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero page-width">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> PERSONAL DIGITAL ARCHIVE</div>
+        <h1>把喜歡的瞬間，<br><span>好好收藏。</span></h1>
+        <p class="hero-description">一個放置動漫插畫、遊戲角色與喜愛畫面的圖片收藏庫。慢慢逛，找到今天最喜歡的一張。</p>
+        <div class="hero-actions">
+          <a class="primary-button" href="#gallery">探索收藏庫 <span aria-hidden="true">↗</span></a>
+          <button class="text-button" id="hero-favorites" type="button">查看我的收藏 <span aria-hidden="true">♡</span></button>
+        </div>
+        <div class="hero-stats">
+          <div><strong id="total-count">—</strong><span>張圖片</span></div><i></i>
+          <div><strong id="category-count">4</strong><span>個分類</span></div><i></i>
+          <div><strong id="hero-favorites-count">0</strong><span>已收藏</span></div>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="art-glow"></div>
+        <div class="art-frame">
+          <img id="hero-image" src="" alt="收藏庫精選圖片">
+          <div class="art-overlay"><span>FEATURED COLLECTION</span><strong>Moments worth keeping.</strong></div>
+        </div>
+        <div class="floating-note"><span>✦</span> curated with love</div>
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+      </div>
+    </section>
+
+    <section class="gallery-section page-width" id="gallery">
+      <div class="section-heading">
+        <div><div class="eyebrow">THE COLLECTION</div><h2>圖片收藏庫<span class="heading-star">✳</span></h2><p>依照分類尋找圖片，或使用搜尋快速找到想看的作品。</p></div>
+        <div class="result-count" id="result-count">載入中…</div>
+      </div>
+      <div class="toolbar">
+        <label class="search-box"><span class="search-icon" aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="搜尋圖片檔名或分類…" autocomplete="off"><kbd>⌘ K</kbd></label>
+        <div class="toolbar-right"><label class="sort-label" for="sort-select">排序</label><select id="sort-select" class="sort-select" aria-label="圖片排序"><option value="default">原始順序</option><option value="name">檔名 A–Z</option><option value="random">隨機探索</option></select><button class="filter-favorites" id="favorites-filter" type="button" aria-pressed="false"><span aria-hidden="true">♡</span> 只看收藏</button></div>
+      </div>
+      <div class="category-row" id="category-filters" aria-label="圖片分類"></div>
+      <div class="gallery-grid" id="gallery-grid" aria-live="polite"></div>
+      <div class="gallery-bottom"><p id="shown-count"></p><button class="load-more-button" id="load-more" type="button" hidden>載入更多圖片 <span aria-hidden="true">＋</span></button></div>
+    </section>
+
+    <section class="about-section page-width" id="about">
+      <div class="about-symbol">✦</div>
+      <div><div class="eyebrow">A SMALL NOTE</div><h2>收藏喜歡的，也收藏當下的心情。</h2><p>這裡整理了 Arknights、Project SEKAI、插畫和其他圖片。收藏清單只會保存在目前的瀏覽器中。</p></div>
+      <a class="back-top" href="#top">回到頂部 ↑</a>
+    </section>
+  </main>
+
+  <footer class="footer page-width"><span>© <span id="current-year">2026</span> YUKI ARCHIVE</span><span>MADE FOR THE THINGS YOU LOVE <b>✦</b></span></footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="圖片檢視器">
+    <div class="lightbox-shell">
+      <button class="lightbox-close" id="lightbox-close" type="button" aria-label="關閉">×</button>
+      <button class="lightbox-arrow lightbox-prev" id="lightbox-prev" type="button" aria-label="上一張">‹</button>
+      <div class="lightbox-image-wrap"><img id="lightbox-image" src="" alt=""></div>
+      <button class="lightbox-arrow lightbox-next" id="lightbox-next" type="button" aria-label="下一張">›</button>
+      <div class="lightbox-info"><div class="lightbox-caption"><strong id="lightbox-title"></strong><span id="lightbox-category"></span></div><div class="lightbox-tools"><span id="lightbox-counter"></span><a id="open-original" href="#" target="_blank" rel="noopener">開啟原圖 ↗</a><a id="download-image" href="#" download>下載 ↓</a><button id="lightbox-favorite" type="button" aria-label="加入收藏">♡</button></div></div>
+    </div>
+  </dialog>
+</body>
+</html>
