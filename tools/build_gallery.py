@@ -39,7 +39,7 @@ def main() -> None:
             shutil.copy2(source, destination)
             gallery_items.append({"path": relative.as_posix(), "category": folder, "title": source.stem})
 
-    manifest = "window.GALLERY_ITEMS = " + json.dumps(gallery_items, ensure_ascii=False, separators=(",", ":")) + ";\n"
+    category_manifest = [{"key": folder, "label": label} for folder, label in CATEGORIES]\n    manifest = "window.GALLERY_CATEGORIES = " + json.dumps(category_manifest, ensure_ascii=False, separators=(",", ":")) + ";\n"\n    manifest += "window.GALLERY_ITEMS = " + json.dumps(gallery_items, ensure_ascii=False, separators=(",", ":")) + ";\n"
     (OUTPUT / "gallery-data.js").write_text(manifest, encoding="utf-8")
     (OUTPUT / ".nojekyll").write_text("", encoding="utf-8")
     print(f"Built {len(gallery_items)} images into {OUTPUT}")
