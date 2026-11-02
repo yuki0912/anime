@@ -4,7 +4,7 @@
 
 ## 網站功能
 
-- Arknights、Project SEKAI、插畫收藏、照片／其他四個分類
+- Arknights、Project SEKAI、插畫收藏、照片／其他四個分類（即使暫時沒有圖片也會顯示分類）
 - 依檔名與分類搜尋、分類篩選、檔名排序、隨機探索
 - 瀏覽器本機收藏清單（localStorage）
 - 圖片燈箱、上一張／下一張、方向鍵切換
@@ -28,13 +28,13 @@
 5. 開啟 GitHub 儲存庫 **Settings → Pages**，在 **Build and deployment → Source** 選擇 **GitHub Actions**。
 6. 到 **Actions** 確認 `Deploy Yuki Anime Gallery` 工作流程成功。
 
-網站網址：<https://yuki0912.github.io/anime/>
+網站網址：<https://yuki0912.github.io/anime/>\n\n目前只有 `照片/` 有圖片；Arknights、Project SEKAI、插畫分類資料夾目前是空的，分類按鈕仍會顯示。舊版素材不在目前 Git 歷史中，需要從原始備份重新上傳。
 
 第一次設定 Pages 發布來源後，往後每次推送到 `main` 都會自動重新部署。
 
 ## 新增或移除圖片
 
-把圖片放進 `arknight/`、`pjsk/`、`圖片/` 或 `照片/` 其中一個資料夾。支援 JPG、JPEG、PNG、GIF、WEBP、AVIF。提交並推送到 `main` 後，GitHub Actions 會執行 `tools/build_gallery.py` 自動產生圖片清單及網站輸出。
+把圖片放進 `arknight/`、`pjsk/`、`圖片/` 或 `照片/` 其中一個資料夾。四個分類固定顯示；空分類會提示應放入的資料夾。支援 JPG、JPEG、PNG、GIF、WEBP、AVIF。提交並推送到 `main` 後，GitHub Actions 會執行 `tools/build_gallery.py` 自動產生圖片清單及網站輸出。
 
 ## 本機預覽
 
